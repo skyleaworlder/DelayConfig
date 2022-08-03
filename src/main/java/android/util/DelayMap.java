@@ -172,7 +172,8 @@ public class DelayMap {
 
     /**
      * to check whether delay value in DelayMap.M all ZERO
-     * if all zero, that means
+     * if all zero => use random to update config
+     * else => config setup manually, don't need to update config, just run
      * @return
      */
     public static boolean isDelayAllZero() {

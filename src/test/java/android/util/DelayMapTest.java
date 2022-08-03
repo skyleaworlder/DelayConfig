@@ -14,7 +14,7 @@ public class DelayMapTest {
             DelayMap.updateDelayTime(
                     "com.example.application0", "Thread-1",
                     "android.app.Activity", 250, 450);
-            DelayConfigHelper.syncConfig();
+            DelayConfigHelper.writeConfig();
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }

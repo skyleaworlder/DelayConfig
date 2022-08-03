@@ -15,17 +15,29 @@ import java.io.*;
  */
 public class DelayConfigHelper {
 
+    private static final String TAG = "DelayConfigHelper";
+
     /**
-     * INITIALIZING: all config
+     * INITIALIZING: config xml not exist, all config need emit
+     * DELAY_ALL_ZERO: config xml well initialized, execute & sleep normally
+     * DELAY_CONFIG_SETUP: config manually, no using random to sleep
+     * CONFIG_FILE_ERROR: unknown error
      */
     public enum STATUS {
         INITIALIZING,
         DELAY_ALL_ZERO,
+        DELAY_CONFIG_SETUP,
         CONFIG_FILE_ERROR,
     }
 
-    private static final String sSystemConfigPath = "./system/config/";
     public static STATUS sStatus = STATUS.INITIALIZING;
+
+    public static void setStatus(STATUS newStatus) {
+        DelayConfigHelper.sStatus = newStatus;
+        // TODO: insert Log.i
+    }
+
+    private static final String sSystemConfigPath = "./system/config/";
     private static String sAppName;
 
     public static String getAppName() {
@@ -50,6 +62,20 @@ public class DelayConfigHelper {
         return sSystemConfigPath + sAppName + ".config.xml";
     }
 
+    /**
+     * return last run config store path.
+     * every time test apk run, record the delay config in the following path:
+     * if app name is null => ./system/config/lastrun.config.xml
+     * else => ./system/config/${sAppName}.lastrun.config.xml
+     * @return
+     */
+    public static String getLastRunConfigFilePath() {
+        if (sAppName == null) {
+            return sSystemConfigPath + "lastrun.config.xml";
+        }
+        return sSystemConfigPath + sAppName + ".lastrun.config.xml";
+    }
+
     public static void readConfig()
             throws ParserConfigurationException, SAXException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -69,17 +95,38 @@ public class DelayConfigHelper {
             // config not found means that
             // this run aims to push some k-v pair to HashMap
             // we don't need to delay when executing sleep
-            sStatus = STATUS.INITIALIZING;
+            setStatus(STATUS.INITIALIZING);
+            return;
         } catch (IOException | SAXException e) {
-            sStatus = STATUS.CONFIG_FILE_ERROR;
+            setStatus(STATUS.CONFIG_FILE_ERROR);
+            return;
         }
+
+        // if all delay is zero, then work normally;
+        // if not all delay zero, means config.xml config well.
+        setStatus(DelayMap.isDelayAllZero()
+                ? STATUS.DELAY_ALL_ZERO
+                : STATUS.DELAY_CONFIG_SETUP);
         return;
     }
 
-    public static void syncConfig()
+    /**
+     * write config xml to disk
+     * not matter what happen, write xml to "lastrun config.xml"
+     *
+     * only write to config.xml when STATUS.INITIALIZING
+     *
+     * @throws IOException
+     */
+    public static void writeConfig()
             throws IOException {
-        FileOutputStream fos = new FileOutputStream(getConfigFilePath());
-        fos.write(DelayMap.serialize().getBytes());
+        byte[] content = DelayMap.serialize().getBytes();
+        if (sStatus == STATUS.INITIALIZING) {
+            FileOutputStream fos = new FileOutputStream(getConfigFilePath());
+            fos.write(content);
+        }
+        FileOutputStream fosLastRun = new FileOutputStream(getLastRunConfigFilePath());
+        fosLastRun.write(content);
     }
 
     /**

@@ -11,7 +11,7 @@ public class DelayConfigHelperTest {
         try {
             DelayConfigHelper.setAppName("com.example.application0");
             DelayConfigHelper.readConfig();
-            DelayConfigHelper.syncConfig();
+            DelayConfigHelper.writeConfig();
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
@@ -23,7 +23,7 @@ public class DelayConfigHelperTest {
             DelayConfigHelper.readConfig();
             DelayConfigHelper.insertDelayPoint(
                     "Thread1", "android.app.ActivityThread", 1000, 100);
-            DelayConfigHelper.syncConfig();
+            DelayConfigHelper.writeConfig();
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
@@ -35,7 +35,7 @@ public class DelayConfigHelperTest {
             DelayConfigHelper.readConfig();
             DelayConfigHelper.insertDelayPoint(
                     "Thread1", "android.app.ActivityThread", 1000, 100);
-            DelayConfigHelper.syncConfig();
+            DelayConfigHelper.writeConfig();
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
