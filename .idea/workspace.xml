@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1515eefc-7d8c-4051-b1e6-45a2048b9e7b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/android/util/DelayConfigHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/android/util/DelayConfigHelper.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/android/util/DelayMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/android/util/DelayMap.java" afterDir="false" />
@@ -54,23 +55,7 @@
       <recent name="D:\Projects\ResearchProjects\FlakyTest\hack\DelayConfig\src\main\java\android\util" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.RandomGeneratorTest.randTest">
-    <configuration name="DelayConfigHelperTest.emptyConfig" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="DelayConfig" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="android.util.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="android.util" />
-      <option name="MAIN_CLASS_NAME" value="android.util.DelayConfigHelperTest" />
-      <option name="METHOD_NAME" value="emptyConfig" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="JUnit.DelayConfigHelperTest.sleepTest">
     <configuration name="DelayConfigHelperTest.nonExistedConfig" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="DelayConfig" />
       <extension name="coverage">
@@ -87,7 +72,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="DelayConfigHelperTest.syncTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="DelayConfigHelperTest.sleepTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="DelayConfig" />
       <extension name="coverage">
         <pattern>
@@ -97,7 +82,23 @@
       </extension>
       <option name="PACKAGE_NAME" value="android.util" />
       <option name="MAIN_CLASS_NAME" value="android.util.DelayConfigHelperTest" />
-      <option name="METHOD_NAME" value="syncTest" />
+      <option name="METHOD_NAME" value="sleepTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DelayMapTest.updateAllDelayTimeTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="DelayConfig" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="android.util.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="android.util" />
+      <option name="MAIN_CLASS_NAME" value="android.util.DelayMapTest" />
+      <option name="METHOD_NAME" value="updateAllDelayTimeTest" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -137,11 +138,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.DelayConfigHelperTest.sleepTest" />
+        <item itemvalue="JUnit.DelayMapTest.updateAllDelayTimeTest" />
         <item itemvalue="JUnit.RandomGeneratorTest.randTest" />
         <item itemvalue="JUnit.DelayMapTest.updateDelayTimeTest" />
         <item itemvalue="JUnit.DelayConfigHelperTest.nonExistedConfig" />
-        <item itemvalue="JUnit.DelayConfigHelperTest.emptyConfig" />
-        <item itemvalue="JUnit.DelayConfigHelperTest.syncTest" />
       </list>
     </recent_temporary>
   </component>
@@ -172,7 +173,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/android/util/DelayConfigHelper.java</url>
-          <line>92</line>
+          <line>91</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">

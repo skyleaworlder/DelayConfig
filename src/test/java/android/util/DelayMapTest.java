@@ -19,4 +19,15 @@ public class DelayMapTest {
             throw new RuntimeException(e);
         }
     }
+
+    @Test public void updateAllDelayTimeTest() {
+        try {
+            DelayConfigHelper.setAppName("com.example.application0");
+            DelayConfigHelper.readConfig();
+            DelayMap.updateAllDelayTime();
+            DelayConfigHelper.writeConfig();
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

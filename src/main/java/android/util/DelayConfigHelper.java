@@ -55,7 +55,7 @@ public class DelayConfigHelper {
      * else => ./system/config/${sAppName}.config.xml
      * @return
      */
-    public static String getConfigFilePath() {
+    private static String getConfigFilePath() {
         if (sAppName == null) {
             return sSystemConfigPath + "config.xml";
         }
@@ -69,7 +69,7 @@ public class DelayConfigHelper {
      * else => ./system/config/${sAppName}.lastrun.config.xml
      * @return
      */
-    public static String getLastRunConfigFilePath() {
+    private static String getLastRunConfigFilePath() {
         if (sAppName == null) {
             return sSystemConfigPath + "lastrun.config.xml";
         }
@@ -87,8 +87,7 @@ public class DelayConfigHelper {
 
         // hard code config xml file
         File file = new File(getConfigFilePath());
-        try {
-            InputStream ins = new FileInputStream(file);
+        try (InputStream ins = new FileInputStream(file)) {
             InputSource source = new InputSource(ins);
             xmlReader.parse(source);
         } catch (FileNotFoundException e) {
@@ -102,11 +101,14 @@ public class DelayConfigHelper {
             return;
         }
 
-        // if all delay is zero, then work normally;
+        // if all delay is zero, then update all delay time;
         // if not all delay zero, means config.xml config well.
-        setStatus(DelayMap.isDelayAllZero()
-                ? STATUS.DELAY_ALL_ZERO
-                : STATUS.DELAY_CONFIG_SETUP);
+        if (DelayMap.isDelayAllZero()) {
+            setStatus(STATUS.DELAY_ALL_ZERO);
+            DelayMap.updateAllDelayTime();
+        } else {
+            setStatus(STATUS.DELAY_CONFIG_SETUP);
+        }
         return;
     }
 
@@ -124,9 +126,11 @@ public class DelayConfigHelper {
         if (sStatus == STATUS.INITIALIZING) {
             FileOutputStream fos = new FileOutputStream(getConfigFilePath());
             fos.write(content);
+            fos.close();
         }
         FileOutputStream fosLastRun = new FileOutputStream(getLastRunConfigFilePath());
         fosLastRun.write(content);
+        fosLastRun.close();
     }
 
     /**
@@ -144,27 +148,15 @@ public class DelayConfigHelper {
         // when config is initializing,
         // DO NOT delay
         if (sStatus == STATUS.INITIALIZING) {
-            insertDelayPoint(tName, className, loc, 0);
+            DelayConfigUtil.insertDelayPoint(sAppName, tName, className, loc, 0);
             return;
         }
 
-        Integer delay = getDelayTime(tName, className, loc);
+        Integer delay = DelayConfigUtil.getDelayTime(sAppName, tName, className, loc);
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
-
-    public static Integer getDelayTime(
-            String tName, String className, Integer loc) {
-        return DelayMap.getDelayTime(sAppName, tName, className, loc);
-    }
-
-    public static boolean insertDelayPoint(
-            String tName, String className, Integer loc, Integer delay) {
-        DelayMap.DelayPoint dp = DelayMap.DelayPoint.newInstance(className, loc, delay);
-        return DelayMap.insertDelayPoint(sAppName, tName, dp);
-    }
-
 }

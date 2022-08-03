@@ -7,7 +7,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 public class DelayConfigHelperTest {
-    @Test public void syncTest() {
+    @Test public void syncConfigTest() {
         try {
             DelayConfigHelper.setAppName("com.example.application0");
             DelayConfigHelper.readConfig();
@@ -17,24 +17,35 @@ public class DelayConfigHelperTest {
         }
     }
 
-    @Test public void emptyConfig() {
+    @Test public void emptyConfigTest() {
         try {
             DelayConfigHelper.setAppName("com.example.emptyconfig");
             DelayConfigHelper.readConfig();
-            DelayConfigHelper.insertDelayPoint(
-                    "Thread1", "android.app.ActivityThread", 1000, 100);
+            DelayConfigUtil.insertDelayPoint(
+                    "com.example.emptyconfig", "Thread1", "android.app.ActivityThread", 1000, 100);
             DelayConfigHelper.writeConfig();
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Test public void nonExistedConfig() {
+    @Test public void nonExistedConfigTest() {
         try {
             DelayConfigHelper.setAppName("com.example.nonexisted");
             DelayConfigHelper.readConfig();
-            DelayConfigHelper.insertDelayPoint(
-                    "Thread1", "android.app.ActivityThread", 1000, 100);
+            DelayConfigUtil.insertDelayPoint(
+                    "com.example.nonexisted", "Thread1", "android.app.ActivityThread", 1000, 100);
+            DelayConfigHelper.writeConfig();
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test public void sleepTest() {
+        try {
+            DelayConfigHelper.setAppName("com.example.nonexisted");
+            DelayConfigHelper.readConfig();
+            DelayConfigHelper.sleep(getClass().getName(), DelayConfigUtil.getLineNumber());
             DelayConfigHelper.writeConfig();
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);

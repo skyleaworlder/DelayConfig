@@ -96,14 +96,19 @@ public class DelayMap {
     }
 
     /**
-     * alternative API
-     * @param aName
-     * @param tName
-     * @param dp
+     * update all delay time using random generator.
+     *
      * @return
      */
-    public static Integer getDelayTime(String aName, String tName, DelayPoint dp) {
-        return getDelayTime(aName, tName, dp.className, dp.loc);
+    public static void updateAllDelayTime() {
+        for (Map.Entry<String, Map<String, DelayPoint>> entry : M.entrySet()) {
+            String tName = entry.getKey();
+            Map<String, DelayPoint> threadConfig = entry.getValue();
+            for (Map.Entry<String, DelayPoint> entry1 : threadConfig.entrySet()) {
+                Integer newDelayTime = RandomGenerator.rand(0, 1000);
+                entry1.getValue().delay = newDelayTime;
+            }
+        }
     }
 
     /**
