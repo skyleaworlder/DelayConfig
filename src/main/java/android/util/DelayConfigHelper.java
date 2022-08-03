@@ -1,5 +1,7 @@
 package android.util;
 
+//// import android.util.Log;
+
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -32,9 +34,19 @@ public class DelayConfigHelper {
 
     public static STATUS sStatus = STATUS.INITIALIZING;
 
+    public static String parseStatus(STATUS status) {
+        switch (status) {
+            case INITIALIZING: return "INITIALIZING";
+            case DELAY_ALL_ZERO: return "DELAY_ALL_ZERO";
+            case DELAY_CONFIG_SETUP: return "DELAY_CONFIG_SETUP";
+            case CONFIG_FILE_ERROR: return "CONFIG_FILE_ERROR";
+            default: return "UNKNOWN";
+        }
+    }
+
     public static void setStatus(STATUS newStatus) {
         DelayConfigHelper.sStatus = newStatus;
-        // TODO: insert Log.i
+        //// Log.i(TAG, "set status: " + parseStatus(newStatus));
     }
 
     private static final String sSystemConfigPath = "./system/config/";
@@ -95,9 +107,12 @@ public class DelayConfigHelper {
             // this run aims to push some k-v pair to HashMap
             // we don't need to delay when executing sleep
             setStatus(STATUS.INITIALIZING);
+            //// Log.i(TAG, "no config file. normally initialize " + sAppName);
             return;
         } catch (IOException | SAXException e) {
             setStatus(STATUS.CONFIG_FILE_ERROR);
+            //// Log.e(TAG, "unexpected error:");
+            //// e.printStackTrace();
             return;
         }
 
@@ -106,8 +121,10 @@ public class DelayConfigHelper {
         if (DelayMap.isDelayAllZero()) {
             setStatus(STATUS.DELAY_ALL_ZERO);
             DelayMap.updateAllDelayTime();
+            //// Log.i(TAG, "update all delay time");
         } else {
             setStatus(STATUS.DELAY_CONFIG_SETUP);
+            //// Log.i(TAG, "delay config has already setup");
         }
         return;
     }
@@ -124,11 +141,15 @@ public class DelayConfigHelper {
             throws IOException {
         byte[] content = DelayMap.serialize().getBytes();
         if (sStatus == STATUS.INITIALIZING) {
-            FileOutputStream fos = new FileOutputStream(getConfigFilePath());
+            String path = getConfigFilePath();
+            //// Log.i(TAG, "write config to config.xml (normally): " + path);
+            FileOutputStream fos = new FileOutputStream(path);
             fos.write(content);
             fos.close();
         }
-        FileOutputStream fosLastRun = new FileOutputStream(getLastRunConfigFilePath());
+        String path = getLastRunConfigFilePath();
+        //// Log.i(TAG, "write config to config.xml (lastrun): " + path);
+        FileOutputStream fosLastRun = new FileOutputStream(path);
         fosLastRun.write(content);
         fosLastRun.close();
     }
@@ -138,12 +159,11 @@ public class DelayConfigHelper {
      *
      * if sStatus is INITIALIZING, sleep method only insert DelayPoint
      * else sleep method would execute Thread.sleep
-     *
-     * @param className
-     * @param loc
      */
-    public static void sleep(String className, Integer loc) {
+    public static void sleep() {
         String tName = Thread.currentThread().getName();
+        String className = DelayConfigUtil.getOuterCallerClassName();
+        Integer loc = DelayConfigUtil.getOuterCallerLineNumber();
 
         // when config is initializing,
         // DO NOT delay
@@ -154,6 +174,7 @@ public class DelayConfigHelper {
 
         Integer delay = DelayConfigUtil.getDelayTime(sAppName, tName, className, loc);
         try {
+            //// Log.i(TAG, "helper let " + sAppName + " sleep " + delay + " ms at " + className + ":" + loc);
             Thread.sleep(delay);
         } catch (InterruptedException e) {
             e.printStackTrace();

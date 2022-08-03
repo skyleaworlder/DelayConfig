@@ -45,7 +45,7 @@ public class DelayConfigHelperTest {
         try {
             DelayConfigHelper.setAppName("com.example.nonexisted");
             DelayConfigHelper.readConfig();
-            DelayConfigHelper.sleep(getClass().getName(), DelayConfigUtil.getLineNumber());
+            DelayConfigHelper.sleep();
             DelayConfigHelper.writeConfig();
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);

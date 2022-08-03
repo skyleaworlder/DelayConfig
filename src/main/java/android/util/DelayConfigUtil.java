@@ -1,5 +1,8 @@
 package android.util;
 
+/**
+ * @hide
+ */
 public class DelayConfigUtil {
     /* package */ static Integer getDelayTime(
             String aName, String tName, String className, Integer loc) {
@@ -12,12 +15,29 @@ public class DelayConfigUtil {
         return DelayMap.insertDelayPoint(aName, tName, dp);
     }
 
-    /* package */ static Integer getLineNumber() {
+    /* package */ static Integer getOuterCallerLineNumber() {
         Thread t = Thread.currentThread();
         StackTraceElement[] stackTraces = t.getStackTrace();
-        if (stackTraces.length < 3) {
+        // 0 -> getStackTrace
+        // 1 -> getLineNumber
+        // 2 -> sleep
+        // 3 -> outside
+        if (stackTraces.length < 4) {
             return 0;
         }
-        return Thread.currentThread().getStackTrace()[2].getLineNumber();
+        return Thread.currentThread().getStackTrace()[3].getLineNumber();
+    }
+
+    /* package */ static String getOuterCallerClassName() {
+        Thread t = Thread.currentThread();
+        StackTraceElement[] stackTraces = t.getStackTrace();
+        // 0 -> getStackTrace
+        // 1 -> getLineNumber
+        // 2 -> sleep
+        // 3 -> outside
+        if (stackTraces.length < 4) {
+            return "";
+        }
+        return Thread.currentThread().getStackTrace()[3].getClassName();
     }
 }

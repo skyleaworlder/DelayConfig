@@ -5,6 +5,9 @@ import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.Random;
 
+/**
+ * @hide
+ */
 public class RandomGenerator {
     private static Random sRandom;
 
