@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<app>
+	<aname>com.example.application0</aname>
+	<threads>
+		<thread>
+			<tname>Thread-1</tname>
+			<delaypoints>
+				<delaypoint>
+					<class>android.app.Activity</class>
+					<loc>250</loc>
+					<delay>500</delay>
+				</delaypoint>
+				<delaypoint>
+					<class>android.os.MessageQueue</class>
+					<loc>500</loc>
+					<delay>1000</delay>
+				</delaypoint>
+			</delaypoints>
+		</thread>
+		<thread>
+			<tname>Thread-2</tname>
+			<delaypoints>
+				<delaypoint>
+					<class>android.os.Message</class>
+					<loc>300</loc>
+					<delay>750</delay>
+				</delaypoint>
+			</delaypoints>
+		</thread>
+	</threads>
+</app>
