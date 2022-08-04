@@ -7,11 +7,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 public class DelayConfigHelperTest {
+
+    private static final String configPath = "./system/config";
+
     @Test public void syncConfigTest() {
         try {
             DelayConfigHelper.setAppName("com.example.application0");
-            DelayConfigHelper.readConfig();
-            DelayConfigHelper.writeConfig();
+            DelayConfigHelper.readConfig(configPath);
+            DelayConfigHelper.writeConfig(configPath);
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
@@ -20,10 +23,10 @@ public class DelayConfigHelperTest {
     @Test public void emptyConfigTest() {
         try {
             DelayConfigHelper.setAppName("com.example.emptyconfig");
-            DelayConfigHelper.readConfig();
+            DelayConfigHelper.readConfig(configPath);
             DelayConfigUtil.insertDelayPoint(
                     "com.example.emptyconfig", "Thread1", "android.app.ActivityThread", 1000, 100);
-            DelayConfigHelper.writeConfig();
+            DelayConfigHelper.writeConfig(configPath);
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
@@ -32,10 +35,10 @@ public class DelayConfigHelperTest {
     @Test public void nonExistedConfigTest() {
         try {
             DelayConfigHelper.setAppName("com.example.nonexisted");
-            DelayConfigHelper.readConfig();
+            DelayConfigHelper.readConfig(configPath);
             DelayConfigUtil.insertDelayPoint(
                     "com.example.nonexisted", "Thread1", "android.app.ActivityThread", 1000, 100);
-            DelayConfigHelper.writeConfig();
+            DelayConfigHelper.writeConfig(configPath);
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
@@ -44,9 +47,9 @@ public class DelayConfigHelperTest {
     @Test public void sleepTest() {
         try {
             DelayConfigHelper.setAppName("com.example.nonexisted");
-            DelayConfigHelper.readConfig();
+            DelayConfigHelper.readConfig(configPath);
             DelayConfigHelper.sleep();
-            DelayConfigHelper.writeConfig();
+            DelayConfigHelper.writeConfig(configPath);
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }

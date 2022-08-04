@@ -4,6 +4,8 @@ package android.util;
  * @hide
  */
 public class DelayConfigUtil {
+    private static final String TAG = "DelayConfigUtil";
+
     /* package */ static Integer getDelayTime(
             String aName, String tName, String className, Integer loc) {
         return DelayMap.getDelayTime(aName, tName, className, loc);
@@ -18,26 +20,34 @@ public class DelayConfigUtil {
     /* package */ static Integer getOuterCallerLineNumber() {
         Thread t = Thread.currentThread();
         StackTraceElement[] stackTraces = t.getStackTrace();
-        // 0 -> getStackTrace
-        // 1 -> getLineNumber
-        // 2 -> sleep
-        // 3 -> outside
-        if (stackTraces.length < 4) {
+        // 0 -> dalvik.system.VMStack.getThreadStackTrace(Native Method)
+        // 1 -> java.lang.Thread.getStackTrace
+        // 2 -> android.util.DelayConfigUtil.getOuterCallerLineNumber
+        // 3 -> android.util.DelayConfigHelper.sleep
+        // 4 -> outside
+        if (stackTraces.length < 5) {
             return 0;
         }
-        return Thread.currentThread().getStackTrace()[3].getLineNumber();
+
+        int i = 0;
+        for (StackTraceElement elem : stackTraces) {
+            Log.i(TAG, "(" + i + ") " + elem);
+            i++;
+        }
+        return stackTraces[4].getLineNumber();
     }
 
     /* package */ static String getOuterCallerClassName() {
         Thread t = Thread.currentThread();
         StackTraceElement[] stackTraces = t.getStackTrace();
-        // 0 -> getStackTrace
-        // 1 -> getLineNumber
-        // 2 -> sleep
-        // 3 -> outside
-        if (stackTraces.length < 4) {
+        // 0 -> dalvik.system.VMStack.getThreadStackTrace(Native Method)
+        // 1 -> java.lang.Thread.getStackTrace
+        // 2 -> android.util.DelayConfigUtil.getOuterCallerLineNumber
+        // 3 -> android.util.DelayConfigHelper.sleep
+        // 4 -> outside
+        if (stackTraces.length < 5) {
             return "";
         }
-        return Thread.currentThread().getStackTrace()[3].getClassName();
+        return stackTraces[4].getClassName();
     }
 }

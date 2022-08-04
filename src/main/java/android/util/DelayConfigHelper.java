@@ -46,10 +46,9 @@ public class DelayConfigHelper {
 
     public static void setStatus(STATUS newStatus) {
         DelayConfigHelper.sStatus = newStatus;
-        //// Log.i(TAG, "set status: " + parseStatus(newStatus));
+        Log.i(TAG, "set status: " + parseStatus(newStatus));
     }
 
-    private static final String sSystemConfigPath = "./system/config/";
     private static String sAppName;
 
     public static String getAppName() {
@@ -67,11 +66,11 @@ public class DelayConfigHelper {
      * else => ./system/config/${sAppName}.config.xml
      * @return
      */
-    private static String getConfigFilePath() {
+    private static String getConfigFilePath(String configPath) {
         if (sAppName == null) {
-            return sSystemConfigPath + "config.xml";
+            return  configPath + "/config.xml";
         }
-        return sSystemConfigPath + sAppName + ".config.xml";
+        return configPath + "/" + sAppName + ".config.xml";
     }
 
     /**
@@ -81,14 +80,22 @@ public class DelayConfigHelper {
      * else => ./system/config/${sAppName}.lastrun.config.xml
      * @return
      */
-    private static String getLastRunConfigFilePath() {
+    private static String getLastRunConfigFilePath(String configPath) {
         if (sAppName == null) {
-            return sSystemConfigPath + "lastrun.config.xml";
+            return  configPath + "/lastrun.config.xml";
         }
-        return sSystemConfigPath + sAppName + ".lastrun.config.xml";
+        return configPath + "/" + sAppName + ".lastrun.config.xml";
     }
 
-    public static void readConfig()
+    /**
+     * read config
+     * @param configPath writable folder path of current app.
+     *                   use context.getFilesDir().getPath().toString(),
+     *                   normally "/data/user/0/${debug app name}/files"
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
+    public static void readConfig(String configPath)
             throws ParserConfigurationException, SAXException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         XMLReader xmlReader = factory.newSAXParser().getXMLReader();
@@ -98,7 +105,7 @@ public class DelayConfigHelper {
         xmlReader.setContentHandler(handler);
 
         // hard code config xml file
-        File file = new File(getConfigFilePath());
+        File file = new File(getConfigFilePath(configPath));
         try (InputStream ins = new FileInputStream(file)) {
             InputSource source = new InputSource(ins);
             xmlReader.parse(source);
@@ -107,12 +114,18 @@ public class DelayConfigHelper {
             // this run aims to push some k-v pair to HashMap
             // we don't need to delay when executing sleep
             setStatus(STATUS.INITIALIZING);
-            //// Log.i(TAG, "no config file. normally initialize " + sAppName);
+            Log.i(TAG, "no config file. normally initialize " + sAppName);
             return;
         } catch (IOException | SAXException e) {
             setStatus(STATUS.CONFIG_FILE_ERROR);
-            //// Log.e(TAG, "unexpected error:");
+            Log.e(TAG, "unexpected error:");
             //// e.printStackTrace();
+            return;
+        }
+
+        if (DelayMap.isEmpty()) {
+            setStatus(STATUS.INITIALIZING);
+            Log.i(TAG, "no delay point in config.xml");
             return;
         }
 
@@ -121,10 +134,10 @@ public class DelayConfigHelper {
         if (DelayMap.isDelayAllZero()) {
             setStatus(STATUS.DELAY_ALL_ZERO);
             DelayMap.updateAllDelayTime();
-            //// Log.i(TAG, "update all delay time");
+            Log.i(TAG, "update all delay time");
         } else {
             setStatus(STATUS.DELAY_CONFIG_SETUP);
-            //// Log.i(TAG, "delay config has already setup");
+            Log.i(TAG, "delay config has already setup");
         }
         return;
     }
@@ -135,20 +148,23 @@ public class DelayConfigHelper {
      *
      * only write to config.xml when STATUS.INITIALIZING
      *
+     * @param configPath writable folder path of current app.
+     *                   use context.getFilesDir().getPath().toString(),
+     *                   normally "/data/user/0/${debug app name}/files"
      * @throws IOException
      */
-    public static void writeConfig()
+    public static void writeConfig(String configPath)
             throws IOException {
         byte[] content = DelayMap.serialize().getBytes();
         if (sStatus == STATUS.INITIALIZING) {
-            String path = getConfigFilePath();
-            //// Log.i(TAG, "write config to config.xml (normally): " + path);
+            String path = getConfigFilePath(configPath);
+            Log.i(TAG, "write config to config.xml (normally): " + path);
             FileOutputStream fos = new FileOutputStream(path);
             fos.write(content);
             fos.close();
         }
-        String path = getLastRunConfigFilePath();
-        //// Log.i(TAG, "write config to config.xml (lastrun): " + path);
+        String path = getLastRunConfigFilePath(configPath);
+        Log.i(TAG, "write config to config.xml (lastrun): " + path);
         FileOutputStream fosLastRun = new FileOutputStream(path);
         fosLastRun.write(content);
         fosLastRun.close();
@@ -161,6 +177,14 @@ public class DelayConfigHelper {
      * else sleep method would execute Thread.sleep
      */
     public static void sleep() {
+        // only sleep method insert DelayPoint,
+        // if sAppName has not been set, it would be uncontrollable.
+        // check sAppName is necessary.
+        if (sAppName == null) {
+            Log.i(TAG, "sleep called unexpected, return");
+            return;
+        }
+
         String tName = Thread.currentThread().getName();
         String className = DelayConfigUtil.getOuterCallerClassName();
         Integer loc = DelayConfigUtil.getOuterCallerLineNumber();
@@ -168,13 +192,14 @@ public class DelayConfigHelper {
         // when config is initializing,
         // DO NOT delay
         if (sStatus == STATUS.INITIALIZING) {
+            Log.i(TAG, "helper insert a point(" + sAppName + "." + className + ":" + loc + ")");
             DelayConfigUtil.insertDelayPoint(sAppName, tName, className, loc, 0);
             return;
         }
 
         Integer delay = DelayConfigUtil.getDelayTime(sAppName, tName, className, loc);
         try {
-            //// Log.i(TAG, "helper let " + sAppName + " sleep " + delay + " ms at " + className + ":" + loc);
+            Log.i(TAG, "helper let " + sAppName + " sleep " + delay + " ms at " + className + ":" + loc);
             Thread.sleep(delay);
         } catch (InterruptedException e) {
             e.printStackTrace();

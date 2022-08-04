@@ -176,6 +176,20 @@ public class DelayMap {
     }
 
     /**
+     * to check whether M is empty (no delay point)
+     * @return if there is no delay point
+     */
+    public static boolean isEmpty() {
+        int dpCount = 0;
+        for (Map.Entry<String, Map<String, DelayPoint>> entry : M.entrySet()) {
+            Map<String, DelayPoint> threadConfig = entry.getValue();
+            // threadConfig size is the number of delay point in this thread
+            dpCount += threadConfig.size();
+        }
+        return dpCount == 0;
+    }
+
+    /**
      * to check whether delay value in DelayMap.M all ZERO
      * if all zero => use random to update config
      * else => config setup manually, don't need to update config, just run

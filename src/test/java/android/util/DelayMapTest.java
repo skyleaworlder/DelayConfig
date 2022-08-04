@@ -7,14 +7,17 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 public class DelayMapTest {
+
+    private static final String configPath = "./system/config";
+
     @Test public void updateDelayTimeTest() {
         try {
             DelayConfigHelper.setAppName("com.example.application0");
-            DelayConfigHelper.readConfig();
+            DelayConfigHelper.readConfig(configPath);
             DelayMap.updateDelayTime(
                     "com.example.application0", "Thread-1",
                     "android.app.Activity", 250, 450);
-            DelayConfigHelper.writeConfig();
+            DelayConfigHelper.writeConfig(configPath);
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
@@ -23,9 +26,9 @@ public class DelayMapTest {
     @Test public void updateAllDelayTimeTest() {
         try {
             DelayConfigHelper.setAppName("com.example.application0");
-            DelayConfigHelper.readConfig();
+            DelayConfigHelper.readConfig(configPath);
             DelayMap.updateAllDelayTime();
-            DelayConfigHelper.writeConfig();
+            DelayConfigHelper.writeConfig(configPath);
         } catch (IOException | ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
