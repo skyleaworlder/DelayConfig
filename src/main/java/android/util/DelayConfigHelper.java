@@ -104,11 +104,13 @@ public class DelayConfigHelper {
         ContentHandler handler = new DelayContentHandler();
         xmlReader.setContentHandler(handler);
 
-        // hard code config xml file
-        File file = new File(getConfigFilePath(configPath));
+        // read config xml file to HashMap
+        String path = getConfigFilePath(configPath);
+        File file = new File(path);
         try (InputStream ins = new FileInputStream(file)) {
             InputSource source = new InputSource(ins);
             xmlReader.parse(source);
+            Log.i(TAG, "read config to DelayMap: " + path);
         } catch (FileNotFoundException e) {
             // config not found means that
             // this run aims to push some k-v pair to HashMap
@@ -177,17 +179,21 @@ public class DelayConfigHelper {
      * else sleep method would execute Thread.sleep
      */
     public static void sleep() {
+        String tName = Thread.currentThread().getName();
+        String className = DelayConfigUtil.getOuterCallerClassName();
+        Integer loc = DelayConfigUtil.getOuterCallerLineNumber();
+
         // only sleep method insert DelayPoint,
         // if sAppName has not been set, it would be uncontrollable.
         // check sAppName is necessary.
         if (sAppName == null) {
-            Log.i(TAG, "sleep called unexpected, return");
+            Log.i(TAG, "sleep called unexpected, return: "
+                    + "(" + tName + "|" + className + ":" + loc + ")");
             return;
         }
 
-        String tName = Thread.currentThread().getName();
-        String className = DelayConfigUtil.getOuterCallerClassName();
-        Integer loc = DelayConfigUtil.getOuterCallerLineNumber();
+        Log.i(TAG, "sleep called normally: "
+                + sAppName + " (" + tName + "|" + className + ":" + loc + ")");
 
         // when config is initializing,
         // DO NOT delay

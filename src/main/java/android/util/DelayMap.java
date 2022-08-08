@@ -7,6 +7,10 @@ import java.util.Map;
  * @hide
  */
 public class DelayMap {
+    private static final String TAG = "DelayMap";
+    private static final int DELAY_LOW_BOUND = 0;
+    private static final int DELAY_HIGH_BOUND = 1000;
+
     public static class DelayPoint {
         public String className;
         public Integer loc;
@@ -105,8 +109,10 @@ public class DelayMap {
             String tName = entry.getKey();
             Map<String, DelayPoint> threadConfig = entry.getValue();
             for (Map.Entry<String, DelayPoint> entry1 : threadConfig.entrySet()) {
-                Integer newDelayTime = RandomGenerator.rand(0, 1000);
-                entry1.getValue().delay = newDelayTime;
+                Integer newDelayTime = RandomGenerator.rand(DELAY_LOW_BOUND, DELAY_HIGH_BOUND);
+                DelayPoint dp = entry1.getValue();
+                Log.i(TAG, "update delay time: " + dp + " to " + newDelayTime);
+                dp.delay = newDelayTime;
             }
         }
     }
