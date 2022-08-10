@@ -6,6 +6,23 @@ package android.util;
 public class DelayConfigUtil {
     private static final String TAG = "DelayConfigUtil";
 
+    /**
+     * return config path
+     * @return /data/user/0/${app name}/config.xml
+     */
+    /* package */ static String getConfigFilePath(String configPath) {
+        return configPath + "/" + "config.xml";
+    }
+
+    /**
+     * return last run config store path.
+     * every time test apk run, record the delay config in the following path:
+     * @return /data/user/0/${app name}/lastrun.config.xml
+     */
+    /* package */ static String getLastRunConfigFilePath(String configPath) {
+        return configPath + "/" + "lastrun.config.xml";
+    }
+
     /* package */ static Integer getDelayTime(
             String aName, String tName, String className, Integer loc) {
         return DelayMap.getDelayTime(aName, tName, className, loc);

@@ -61,33 +61,6 @@ public class DelayConfigHelper {
     }
 
     /**
-     * return config path.
-     * if app name is null => ./system/config/config.xml
-     * else => ./system/config/${sAppName}.config.xml
-     * @return
-     */
-    private static String getConfigFilePath(String configPath) {
-        if (sAppName == null) {
-            return  configPath + "/config.xml";
-        }
-        return configPath + "/" + sAppName + ".config.xml";
-    }
-
-    /**
-     * return last run config store path.
-     * every time test apk run, record the delay config in the following path:
-     * if app name is null => ./system/config/lastrun.config.xml
-     * else => ./system/config/${sAppName}.lastrun.config.xml
-     * @return
-     */
-    private static String getLastRunConfigFilePath(String configPath) {
-        if (sAppName == null) {
-            return  configPath + "/lastrun.config.xml";
-        }
-        return configPath + "/" + sAppName + ".lastrun.config.xml";
-    }
-
-    /**
      * read config
      * @param configPath writable folder path of current app.
      *                   use context.getFilesDir().getPath().toString(),
@@ -105,7 +78,7 @@ public class DelayConfigHelper {
         xmlReader.setContentHandler(handler);
 
         // read config xml file to HashMap
-        String path = getConfigFilePath(configPath);
+        String path = DelayConfigUtil.getConfigFilePath(configPath);
         File file = new File(path);
         try (InputStream ins = new FileInputStream(file)) {
             InputSource source = new InputSource(ins);
@@ -159,13 +132,13 @@ public class DelayConfigHelper {
             throws IOException {
         byte[] content = DelayMap.serialize().getBytes();
         if (sStatus == STATUS.INITIALIZING) {
-            String path = getConfigFilePath(configPath);
+            String path = DelayConfigUtil.getConfigFilePath(configPath);
             Log.i(TAG, "write config to config.xml (normally): " + path);
             FileOutputStream fos = new FileOutputStream(path);
             fos.write(content);
             fos.close();
         }
-        String path = getLastRunConfigFilePath(configPath);
+        String path = DelayConfigUtil.getLastRunConfigFilePath(configPath);
         Log.i(TAG, "write config to config.xml (lastrun): " + path);
         FileOutputStream fosLastRun = new FileOutputStream(path);
         fosLastRun.write(content);
