@@ -16,8 +16,8 @@ public class DelayConfigHelper {
     private static final String TAG = "DelayConfigHelper";
 
     /**
-     * INITIALIZING: config xml not exist, all config need emit
-     * DELAY_ALL_ZERO: config xml well initialized, execute & sleep normally
+     * INITIALIZING: config props not exist, all config need emit
+     * DELAY_ALL_ZERO: config props well initialized, execute & sleep normally
      * DELAY_CONFIG_SETUP: config manually, no using random to sleep
      * CONFIG_FILE_ERROR: unknown error
      */
@@ -37,6 +37,7 @@ public class DelayConfigHelper {
             case DELAY_ALL_ZERO: return "DELAY_ALL_ZERO";
             case DELAY_CONFIG_SETUP: return "DELAY_CONFIG_SETUP";
             case CONFIG_FILE_ERROR: return "CONFIG_FILE_ERROR";
+            case PERMISSION_DENIED: return "PERMISSION_DENIED";
             default: return "UNKNOWN";
         }
     }
@@ -64,34 +65,36 @@ public class DelayConfigHelper {
      *                   normally "/data/user/0/${debug app name}/files"
      */
     public static void readConfig(String configPath) {
-        // read config xml file to HashMap
+        // read config properties file to Properties
         File file = new File(configPath);
         try (InputStream ins = new FileInputStream(file)) {
             DelayProperties.load(ins);
-            //// Log.i(TAG, "read config to DelayMap: " + path);
+            //// Log.i(TAG, "read config to Delay: " + configPath);
         } catch (FileNotFoundException e) {
             // Permission denied would also throw FileNotFoundException
             Path path = Paths.get(configPath);
             if (Files.exists(path) && !file.canRead()) {
                 setStatus(STATUS.PERMISSION_DENIED);
+                //// Log.i(TAG, "permission denied: " + configPath);
+                e.printStackTrace();
                 return;
             }
             // config not found means that
-            // this run aims to push some k-v pair to HashMap
+            // this run aims to push some k-v pair to Properties
             // we don't need to delay when executing sleep
             setStatus(STATUS.INITIALIZING);
             //// Log.i(TAG, "no config file. normally initialize " + sAppName);
             return;
         } catch (IOException e) {
             setStatus(STATUS.CONFIG_FILE_ERROR);
-            //// Log.e(TAG, "unexpected error:");
+            //// Log.i(TAG, "unexpected error:");
             e.printStackTrace();
             return;
         }
 
         if (DelayProperties.isEmpty()) {
             setStatus(STATUS.INITIALIZING);
-            //// Log.i(TAG, "no delay point in config.xml");
+            //// Log.i(TAG, "no delay point in config.properties");
             return;
         }
         setStatus(STATUS.DELAY_CONFIG_SETUP);
@@ -100,9 +103,9 @@ public class DelayConfigHelper {
     }
 
     /**
-     * write config xml to disk
+     * write config properties to disk
      *
-     * only write to config.xml when STATUS.INITIALIZING
+     * only write to config.properties when STATUS.INITIALIZING
      *
      * @param configPath writable folder path of current app.
      *                   use context.getFilesDir().getPath().toString(),
@@ -112,11 +115,13 @@ public class DelayConfigHelper {
     public static void writeConfig(String configPath)
             throws IOException {
         if (sStatus == STATUS.INITIALIZING) {
-            //// Log.i(TAG, "write config to config.xml (normally): " + configPath);
+            //// Log.i(TAG, "write config to config.properties (normally): " + configPath);
             FileOutputStream fos = new FileOutputStream(configPath);
             DelayProperties.store(fos);
             fos.close();
+            return;
         }
+        //// Log.w(TAG, "try to write config when status is: " + sSTATUS);
     }
 
     /**
@@ -142,7 +147,10 @@ public class DelayConfigHelper {
         // DO NOT delay
         if (sStatus == STATUS.INITIALIZING) {
             //// Log.i(TAG, "helper insert a point(" + sAppName + "." + className + ":" + loc + ")");
-            DelayConfigUtil.insertDelayPointToDelayProperties(sAppName, tName, 0);
+            boolean ok = DelayConfigUtil.insertDelayPointToDelayProperties(sAppName, tName, 0);
+            if (!ok) {
+                //// Log.w(TAG, "insert delay point failed: " + sAppName + "|" + tName);
+            }
             return;
         }
 
