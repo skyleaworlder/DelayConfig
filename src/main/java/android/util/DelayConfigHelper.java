@@ -2,14 +2,10 @@ package android.util;
 
 //// import android.util.Log;
 
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * ActivityThread <-> app / process <-> DelayConfigHelper
@@ -30,6 +26,7 @@ public class DelayConfigHelper {
         DELAY_ALL_ZERO,
         DELAY_CONFIG_SETUP,
         CONFIG_FILE_ERROR,
+        PERMISSION_DENIED
     }
 
     public static STATUS sStatus = STATUS.INITIALIZING;
@@ -46,7 +43,7 @@ public class DelayConfigHelper {
 
     public static void setStatus(STATUS newStatus) {
         DelayConfigHelper.sStatus = newStatus;
-        Log.i(TAG, "set status: " + parseStatus(newStatus));
+        //// //// Log.i(TAG, "set status: " + parseStatus(newStatus));
     }
 
     private static String sAppName;
@@ -57,7 +54,7 @@ public class DelayConfigHelper {
 
     public static void setAppName(String aName) {
         sAppName = aName;
-        DelayMap.APP_NAME = aName;
+        DelayProperties.setAppName(aName);
     }
 
     /**
@@ -65,61 +62,45 @@ public class DelayConfigHelper {
      * @param configPath writable folder path of current app.
      *                   use context.getFilesDir().getPath().toString(),
      *                   normally "/data/user/0/${debug app name}/files"
-     * @throws ParserConfigurationException
-     * @throws SAXException
      */
-    public static void readConfig(String configPath)
-            throws ParserConfigurationException, SAXException {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        XMLReader xmlReader = factory.newSAXParser().getXMLReader();
-
-        // use self-defined ContentHandler & parse xml
-        ContentHandler handler = new DelayContentHandler();
-        xmlReader.setContentHandler(handler);
-
+    public static void readConfig(String configPath) {
         // read config xml file to HashMap
-        String path = DelayConfigUtil.getConfigFilePath(configPath);
-        File file = new File(path);
+        File file = new File(configPath);
         try (InputStream ins = new FileInputStream(file)) {
-            InputSource source = new InputSource(ins);
-            xmlReader.parse(source);
-            Log.i(TAG, "read config to DelayMap: " + path);
+            DelayProperties.load(ins);
+            //// Log.i(TAG, "read config to DelayMap: " + path);
         } catch (FileNotFoundException e) {
+            // Permission denied would also throw FileNotFoundException
+            Path path = Paths.get(configPath);
+            if (Files.exists(path) && !file.canRead()) {
+                setStatus(STATUS.PERMISSION_DENIED);
+                return;
+            }
             // config not found means that
             // this run aims to push some k-v pair to HashMap
             // we don't need to delay when executing sleep
             setStatus(STATUS.INITIALIZING);
-            Log.i(TAG, "no config file. normally initialize " + sAppName);
+            //// Log.i(TAG, "no config file. normally initialize " + sAppName);
             return;
-        } catch (IOException | SAXException e) {
+        } catch (IOException e) {
             setStatus(STATUS.CONFIG_FILE_ERROR);
-            Log.e(TAG, "unexpected error:");
-            //// e.printStackTrace();
+            //// Log.e(TAG, "unexpected error:");
+            e.printStackTrace();
             return;
         }
 
-        if (DelayMap.isEmpty()) {
+        if (DelayProperties.isEmpty()) {
             setStatus(STATUS.INITIALIZING);
-            Log.i(TAG, "no delay point in config.xml");
+            //// Log.i(TAG, "no delay point in config.xml");
             return;
         }
-
-        // if all delay is zero, then update all delay time;
-        // if not all delay zero, means config.xml config well.
-        if (DelayMap.isDelayAllZero()) {
-            setStatus(STATUS.DELAY_ALL_ZERO);
-            DelayMap.updateAllDelayTime();
-            Log.i(TAG, "update all delay time");
-        } else {
-            setStatus(STATUS.DELAY_CONFIG_SETUP);
-            Log.i(TAG, "delay config has already setup");
-        }
+        setStatus(STATUS.DELAY_CONFIG_SETUP);
+        //// Log.i(TAG, "delay config has already setup");
         return;
     }
 
     /**
      * write config xml to disk
-     * not matter what happen, write xml to "lastrun config.xml"
      *
      * only write to config.xml when STATUS.INITIALIZING
      *
@@ -130,19 +111,12 @@ public class DelayConfigHelper {
      */
     public static void writeConfig(String configPath)
             throws IOException {
-        byte[] content = DelayMap.serialize().getBytes();
         if (sStatus == STATUS.INITIALIZING) {
-            String path = DelayConfigUtil.getConfigFilePath(configPath);
-            Log.i(TAG, "write config to config.xml (normally): " + path);
-            FileOutputStream fos = new FileOutputStream(path);
-            fos.write(content);
+            //// Log.i(TAG, "write config to config.xml (normally): " + configPath);
+            FileOutputStream fos = new FileOutputStream(configPath);
+            DelayProperties.store(fos);
             fos.close();
         }
-        String path = DelayConfigUtil.getLastRunConfigFilePath(configPath);
-        Log.i(TAG, "write config to config.xml (lastrun): " + path);
-        FileOutputStream fosLastRun = new FileOutputStream(path);
-        fosLastRun.write(content);
-        fosLastRun.close();
     }
 
     /**
@@ -153,32 +127,28 @@ public class DelayConfigHelper {
      */
     public static void sleep() {
         String tName = Thread.currentThread().getName();
-        String className = DelayConfigUtil.getOuterCallerClassName();
-        Integer loc = DelayConfigUtil.getOuterCallerLineNumber();
 
         // only sleep method insert DelayPoint,
         // if sAppName has not been set, it would be uncontrollable.
         // check sAppName is necessary.
         if (sAppName == null) {
-            Log.i(TAG, "sleep called unexpected, return: "
-                    + "(" + tName + "|" + className + ":" + loc + ")");
+            //// Log.i(TAG, "sleep called unexpected, return: " + "(" + tName + "|" + className + ":" + loc + ")");
             return;
         }
 
-        Log.i(TAG, "sleep called normally: "
-                + sAppName + " (" + tName + "|" + className + ":" + loc + ")");
+        //// Log.i(TAG, "sleep called normally: " + sAppName + " (" + tName + "|" + className + ":" + loc + ")");
 
         // when config is initializing,
         // DO NOT delay
         if (sStatus == STATUS.INITIALIZING) {
-            Log.i(TAG, "helper insert a point(" + sAppName + "." + className + ":" + loc + ")");
-            DelayConfigUtil.insertDelayPoint(sAppName, tName, className, loc, 0);
+            //// Log.i(TAG, "helper insert a point(" + sAppName + "." + className + ":" + loc + ")");
+            DelayConfigUtil.insertDelayPointToDelayProperties(sAppName, tName, 0);
             return;
         }
 
-        Integer delay = DelayConfigUtil.getDelayTime(sAppName, tName, className, loc);
+        Integer delay = DelayConfigUtil.getDelayTimeFromDelayProperties(sAppName, tName);
         try {
-            Log.i(TAG, "helper let " + sAppName + " sleep " + delay + " ms at " + className + ":" + loc);
+            //// Log.i(TAG, "helper let " + sAppName + " sleep " + delay + " ms at " + className + ":" + loc);
             Thread.sleep(delay);
         } catch (InterruptedException e) {
             e.printStackTrace();

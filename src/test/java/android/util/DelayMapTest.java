@@ -18,7 +18,7 @@ public class DelayMapTest {
                     "com.example.application0", "Thread-1",
                     "android.app.Activity", 250, 450);
             DelayConfigHelper.writeConfig(configPath);
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -29,7 +29,7 @@ public class DelayMapTest {
             DelayConfigHelper.readConfig(configPath);
             DelayMap.updateAllDelayTime();
             DelayConfigHelper.writeConfig(configPath);
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

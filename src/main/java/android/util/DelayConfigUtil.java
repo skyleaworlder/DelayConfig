@@ -23,12 +23,22 @@ public class DelayConfigUtil {
         return configPath + "/" + "lastrun.config.xml";
     }
 
-    /* package */ static Integer getDelayTime(
+    /* package */ static Integer getDelayTimeFromDelayProperties(
+            String aName, String tName) {
+        return DelayProperties.getDelayTime(aName, tName);
+    }
+
+    /* package */ static boolean insertDelayPointToDelayProperties(
+            String aName, String tName, Integer delay) {
+        return DelayProperties.insertDelayPoint(aName, tName, delay);
+    }
+
+    /* package */ static Integer getDelayTimeFromDelayMap(
             String aName, String tName, String className, Integer loc) {
         return DelayMap.getDelayTime(aName, tName, className, loc);
     }
 
-    /* package */ static boolean insertDelayPoint(
+    /* package */ static boolean insertDelayPointToDelayMap(
             String aName, String tName, String className, Integer loc, Integer delay) {
         DelayMap.DelayPoint dp = DelayMap.DelayPoint.newInstance(className, loc, delay);
         return DelayMap.insertDelayPoint(aName, tName, dp);
@@ -48,7 +58,7 @@ public class DelayConfigUtil {
 
         int i = 0;
         for (StackTraceElement elem : stackTraces) {
-            Log.i(TAG, "(" + i + ") " + elem);
+            //// Log.i(TAG, "(" + i + ") " + elem);
             i++;
         }
         return stackTraces[4].getLineNumber();

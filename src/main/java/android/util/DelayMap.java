@@ -111,7 +111,7 @@ public class DelayMap {
             for (Map.Entry<String, DelayPoint> entry1 : threadConfig.entrySet()) {
                 Integer newDelayTime = RandomGenerator.rand(DELAY_LOW_BOUND, DELAY_HIGH_BOUND);
                 DelayPoint dp = entry1.getValue();
-                Log.i(TAG, "update delay time: " + dp + " to " + newDelayTime);
+                //// Log.i(TAG, "update delay time: " + dp + " to " + newDelayTime);
                 dp.delay = newDelayTime;
             }
         }

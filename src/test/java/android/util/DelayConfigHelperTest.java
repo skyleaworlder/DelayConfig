@@ -15,7 +15,7 @@ public class DelayConfigHelperTest {
             DelayConfigHelper.setAppName("com.example.application0");
             DelayConfigHelper.readConfig(configPath);
             DelayConfigHelper.writeConfig(configPath);
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -24,10 +24,10 @@ public class DelayConfigHelperTest {
         try {
             DelayConfigHelper.setAppName("com.example.emptyconfig");
             DelayConfigHelper.readConfig(configPath);
-            DelayConfigUtil.insertDelayPoint(
+            DelayConfigUtil.insertDelayPointToDelayMap(
                     "com.example.emptyconfig", "Thread1", "android.app.ActivityThread", 1000, 100);
             DelayConfigHelper.writeConfig(configPath);
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -36,10 +36,10 @@ public class DelayConfigHelperTest {
         try {
             DelayConfigHelper.setAppName("com.example.nonexisted");
             DelayConfigHelper.readConfig(configPath);
-            DelayConfigUtil.insertDelayPoint(
+            DelayConfigUtil.insertDelayPointToDelayMap(
                     "com.example.nonexisted", "Thread1", "android.app.ActivityThread", 1000, 100);
             DelayConfigHelper.writeConfig(configPath);
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -50,7 +50,7 @@ public class DelayConfigHelperTest {
             DelayConfigHelper.readConfig(configPath);
             DelayConfigHelper.sleep();
             DelayConfigHelper.writeConfig(configPath);
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
